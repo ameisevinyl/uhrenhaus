@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from datetime import date
 
 class Unit(models.Model):
     """Represents a location in the building, such as rooms or units."""
@@ -51,6 +52,9 @@ class Meter(models.Model):
         verbose_name=_("Parent Meter"),
         help_text=_("The main meter this meter is a sub-meter of, if applicable.")
     )
+
+    install_date = models.DateField(default=date(2013, 1, 1), verbose_name=_("Installation Date"))
+    deinstall_date = models.DateField(blank=True, null=True, verbose_name=_("Deinstallation Date"))
 
     def __str__(self):
         return f"Meter {self.serial_number} ({self.consumption_type.name}) in {self.unit.name}"
