@@ -38,6 +38,9 @@ class Meter(models.Model):
         Unit, on_delete=models.CASCADE, related_name="meters", verbose_name=_("Connected Unit"),
         help_text=_("The unit or room where this meter is installed.")
     )
+
+    location_description = models.TextField(blank=True, null=True, verbose_name=_("Where to find this meter?"))
+
     parent_meter = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
