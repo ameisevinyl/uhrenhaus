@@ -50,3 +50,27 @@ class Meter(models.Model):
 
     def __str__(self):
         return f"Meter {self.serial_number} ({self.consumption_type.name}) in {self.unit.name}"
+
+class ConversionFactor(models.Model):
+    """Stores the factor to convert one consumption type to another within a valid date range."""
+    from_consumption_type = models.ForeignKey(
+        ConsumptionType,
+        on_delete=models.CASCADE,
+        related_name="conversion_from",
+        verbose_name=_("From Consumption Type")
+    )
+    to_consumption_type = models.ForeignKey(
+        ConsumptionType,
+        on_delete=models.CASCADE,
+        related_name="conversion_to",
+        verbose_name=_("To Consumption Type")
+    )
+    factor = models.FloatField(verbose_name=_("Conversion Factor"))
+    start_date = models.DateField(verbose_name=_("Start Date"))
+    end_date = models.DateField(verbose_name=_("End Date"))
+
+    def __str__(self):
+        return (
+            f"Convert {self.from_consumption_type.name} → {self.to_consumption_type.name} "
+            f"at {self.factor} (Valid: {self.start_date} to {self.end_date})"
+        )
