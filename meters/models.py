@@ -30,6 +30,7 @@ class ConsumptionType(models.Model):
 
 class Meter(models.Model):
     """Represents a physical utility meter connected to a specific consumption type and building unit."""
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Short name"))
     serial_number = models.CharField(max_length=100, unique=True, verbose_name=_("Serial Number"))
     consumption_type = models.ForeignKey(
         ConsumptionType, on_delete=models.CASCADE, related_name="meters", verbose_name=_("Consumption Type")
@@ -39,7 +40,7 @@ class Meter(models.Model):
         help_text=_("The unit or room where this meter is installed.")
     )
 
-    location_description = models.TextField(blank=True, null=True, verbose_name=_("Where to find this meter?"))
+    location_description = models.TextField(blank=True, null=True, verbose_name=_("Where to find this meter?2"))
 
     parent_meter = models.ForeignKey(
         'self',
