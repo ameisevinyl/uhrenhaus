@@ -1,37 +1,47 @@
 from django.contrib import admin
-from .models import Unit, ConsumptionType, Meter, MeterReading, ConversionFactor
+from django.utils.html import format_html
+from .models import Unit, ConsumptionType, Meter, ConversionFactor, MeterReading
+
 
 @admin.register(Unit)
 class UnitAdmin(admin.ModelAdmin):
-    """Admin configuration for the Unit model."""
-    list_display = ('name', 'location', 'size', 'parent_unit')
-    search_fields = ('name', 'location')
-    list_filter = ('parent_unit',)
+    list_display = ("name", "location", "size", "parent_unit", "created_at", "updated_at")
+    search_fields = ("name", "location")
+    list_filter = ("created_at", "updated_at")
 
 
 @admin.register(ConsumptionType)
 class ConsumptionTypeAdmin(admin.ModelAdmin):
-    """Admin configuration for the ConsumptionType model."""
-    list_display = ('name', 'unit')
-    search_fields = ('name', 'unit')
+    list_display = ("name", "unit", "created_at", "updated_at")
+    search_fields = ("name",)
+    list_filter = ("created_at", "updated_at")
 
 
 @admin.register(Meter)
 class MeterAdmin(admin.ModelAdmin):
-    """Admin configuration for the Meter model."""
-    list_display = ('serial_number', 'consumption_type', 'unit', 'parent_meter')
-    search_fields = ('serial_number', 'unit__name', 'consumption_type__name')
-    list_filter = ('consumption_type', 'unit')
+    list_display = ("label", "serial_number", "consumption_type", "unit", "install_date", "deinstall_date", "created_at", "updated_at")
+    search_fields = ("label", "serial_number")
+    list_filter = ("install_date", "deinstall_date", "created_at", "updated_at")
+
 
 @admin.register(ConversionFactor)
 class ConversionFactorAdmin(admin.ModelAdmin):
-    """Admin configuration for the ConversionFactor model."""
-    list_display = ('from_consumption_type', 'to_consumption_type', 'factor', 'start_date', 'end_date')
-    search_fields = ('from_consumption_type__name', 'to_consumption_type__name')
-    list_filter = ('start_date', 'end_date')
+    list_display = ("from_consumption_type", "to_consumption_type", "factor", "start_date", "end_date", "created_at", "updated_at")
+    list_filter = ("start_date", "end_date", "created_at", "updated_at")
+
 
 @admin.register(MeterReading)
 class MeterReadingAdmin(admin.ModelAdmin):
-    list_display = ("meter", "date", "value", "user", "photo")
-    list_filter = ("meter", "date", "user")
+    list_display = ("meter", "reading_date", "value", "user", "is_estimated", "photo_preview", "created_at", "updated_at")
+    list_filter = ("reading_date", "is_estimated", "created_at", "updated_at")
     search_fields = ("meter__label", "user__username")
+
+    readonly_fields = ("photo_preview", "created_at", "updated_at")
+
+    def photo_preview(self, obj):
+        """Show a preview of the uploaded meter reading photo."""
+        if obj.photo:
+            return format_html('<img src="{}" style="width: 100px; height: auto;" />', obj.photo.url)
+        return "(No photo)"
+
+    photo_preview.short_description = "Photo Preview"

@@ -14,7 +14,14 @@ class Contact(AbstractUser):
     uid_number = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("UID Number (VAT)"))
     phone_number = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Phone Number"))
 
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))  # ✅ Timestamp for creation
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))  # ✅ Auto-update timestamp
+
+    class Meta:
+        ordering = ["-created_at"]  # ✅ Show newest contacts first
+
     def __str__(self):
+        """Show company name if available, otherwise username."""
         return f"{self.company_name or self.username} ({self.email})"
 
 
@@ -37,7 +44,14 @@ class Address(models.Model):
     
     is_residential = models.BooleanField(default=False, verbose_name=_("Is this a residential address?"))
 
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))  # ✅ Timestamp for creation
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))  # ✅ Auto-update timestamp
+
+    class Meta:
+        ordering = ["-created_at"]  # ✅ Show newest addresses first
+
     def __str__(self):
+        """Generate a structured address string."""
         parts = [self.address_line_1]
         if self.address_line_2:
             parts.append(self.address_line_2)
