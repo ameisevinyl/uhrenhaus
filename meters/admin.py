@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Unit, ConsumptionType, Meter, ConversionFactor
+from .models import Unit, ConsumptionType, Meter, MeterReading, ConversionFactor
 
 @admin.register(Unit)
 class UnitAdmin(admin.ModelAdmin):
@@ -29,3 +29,9 @@ class ConversionFactorAdmin(admin.ModelAdmin):
     list_display = ('from_consumption_type', 'to_consumption_type', 'factor', 'start_date', 'end_date')
     search_fields = ('from_consumption_type__name', 'to_consumption_type__name')
     list_filter = ('start_date', 'end_date')
+
+@admin.register(MeterReading)
+class MeterReadingAdmin(admin.ModelAdmin):
+    list_display = ("meter", "date", "value", "user", "photo")
+    list_filter = ("meter", "date", "user")
+    search_fields = ("meter__label", "user__username")
