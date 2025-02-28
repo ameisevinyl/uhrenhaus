@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Unit, ConsumptionType, Meter, ConversionFactor, MeterReading
+from django.utils.translation import gettext_lazy as _
+from .models import Unit, ConsumptionType, Meter, ConversionFactor, MeterReading, Expense
 
 
 @admin.register(Unit)
@@ -45,3 +46,29 @@ class MeterReadingAdmin(admin.ModelAdmin):
         return "(No photo)"
 
     photo_preview.short_description = "Photo Preview"
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = (
+        "invoice_number", "meter", "supplier", "invoice_date", 
+        "start_reading", "end_reading", "total_cost", "vat_rate", "invoice_pdf"
+    )
+    search_fields = ("invoice_number", "supplier__username")
+    list_filter = ("invoice_date", "supplier", "meter")
+    
+    readonly_fields = ("total_cost", "created_at", "updated_at")  # ✅ VAT rate is now editable
+
+    fieldsets = (
+        (_("Invoice Details"), {
+            "fields": ("invoice_number", "supplier", "invoice_date", "invoice_pdf"),
+        }),
+        (_("Meter & Readings"), {
+            "fields": ("meter", "start_reading", "end_reading"),
+        }),
+        (_("Cost Breakdown"), {
+            "fields": ("fixed_costs", "variable_costs", "total_cost", "vat_rate"),  # ✅ VAT rate is now editable
+        }),
+        (_("Timestamps"), {
+            "fields": ("created_at", "updated_at"),
+        }),
+    )

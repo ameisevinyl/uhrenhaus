@@ -8,3 +8,8 @@ db.sqlite3
 
 # Media uploads
 media/
+
+# dotenv files
+.env
+.env.production
+.env.local

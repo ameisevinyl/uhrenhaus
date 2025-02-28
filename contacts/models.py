@@ -61,3 +61,25 @@ class Address(models.Model):
         if self.is_residential:
             parts.append("(Residential)")
         return " - ".join(parts)
+
+class BankAccount(models.Model):
+    """
+    Stores bank account details for a contact.
+    A contact can have multiple bank accounts.
+    """
+    contact = models.ForeignKey(
+        Contact, on_delete=models.CASCADE, related_name="bank_accounts", verbose_name=_("Contact")
+    )
+    account_holder = models.CharField(max_length=255, verbose_name=_("Account Holder Name"))
+    iban = models.CharField(max_length=34, unique=True, verbose_name=_("IBAN"))
+    bic = models.CharField(max_length=11, blank=True, null=True, verbose_name=_("BIC/SWIFT"))
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))
+
+    class Meta:
+        verbose_name = _("Bank Account")
+        verbose_name_plural = _("Bank Accounts")
+
+    def __str__(self):
+        return f"{self.account_holder} - {self.iban}"
