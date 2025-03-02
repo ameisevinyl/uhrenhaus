@@ -42,7 +42,8 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+
 
 
 # Application definition
@@ -152,5 +153,6 @@ DEFAULT_FROM_EMAIL = os.getenv("EMAIL_FROM_ADDRESS")
 REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL")
 
 # Debugging (Prints emails to console instead of sending)
-if os.getenv("DEBUG", "True") == "True":
+if DEBUG and not EMAIL_BACKEND.startswith("django.core.mail.backends.smtp"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
