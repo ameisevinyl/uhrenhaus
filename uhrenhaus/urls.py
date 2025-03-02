@@ -22,6 +22,7 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("meters.urls")),  # Your app's URLs
+    path("accounts/", include("allauth.urls")),  # ✅ Django-Allauth URLs
 ]
 
 # ✅ Serve media files during development

@@ -55,6 +55,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Django-Allauth
+    'allauth',
+    'allauth.account',
+
+    # Our apps
     'meters',
     'contacts'
 ]
@@ -67,6 +73,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+     # Add the account middleware:
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'uhrenhaus.urls'
@@ -118,6 +127,29 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth authentication
+]
+
+# ✅ Use email instead of username for login
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # Disable username login
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Options: "none", "optional", "mandatory"
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirect after logout
+ACCOUNT_LOGOUT_ON_GET = True  # Logout immediately on GET request
+
+# ✅ Redirect after login
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGOUT_REDIRECT_URL = "/"
+
+# ✅ Use our custom user model
+AUTH_USER_MODEL = "contacts.Contact"
+
+# ✅ Ensure email is unique
+ACCOUNT_UNIQUE_EMAIL = True
 
 
 # Internationalization
