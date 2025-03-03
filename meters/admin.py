@@ -49,26 +49,8 @@ class MeterReadingAdmin(admin.ModelAdmin):
 
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = (
-        "invoice_number", "meter", "supplier", "invoice_date", 
-        "start_reading", "end_reading", "total_cost", "vat_rate", "invoice_pdf"
-    )
-    search_fields = ("invoice_number", "supplier__username")
-    list_filter = ("invoice_date", "supplier", "meter")
-    
-    readonly_fields = ("total_cost", "created_at", "updated_at")  # ✅ VAT rate is now editable
+    list_display = ("invoice_number", "meter", "supplier", "invoice_date", "total_cost", "vat_rate", "consumption")
+    search_fields = ("invoice_number", "supplier__username", "meter__label")
+    list_filter = ("invoice_date", "meter", "supplier")
 
-    fieldsets = (
-        (_("Invoice Details"), {
-            "fields": ("invoice_number", "supplier", "invoice_date", "invoice_pdf"),
-        }),
-        (_("Meter & Readings"), {
-            "fields": ("meter", "start_reading", "end_reading"),
-        }),
-        (_("Cost Breakdown"), {
-            "fields": ("fixed_costs", "variable_costs", "total_cost", "vat_rate"),  # ✅ VAT rate is now editable
-        }),
-        (_("Timestamps"), {
-            "fields": ("created_at", "updated_at"),
-        }),
-    )
+    readonly_fields = ("total_cost", "consumption")  # ✅ Ensure calculated fields are read-only

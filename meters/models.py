@@ -131,7 +131,7 @@ class MeterReading(models.Model):
 class Expense(models.Model):
     """
     Represents an expense related to a utility meter (e.g., water, heating, electricity).
-    Includes both fixed and variable costs, PDF invoice upload, and VAT rate.
+    Links to actual meter readings instead of storing raw float values.
     """
     meter = models.ForeignKey(
         "Meter",
@@ -160,9 +160,21 @@ class Expense(models.Model):
 
     invoice_date = models.DateField(verbose_name=_("Invoice Date"))
 
-    # ✅ Start and End Readings for the period
-    start_reading = models.FloatField(verbose_name=_("Start Reading"), help_text=_("Reading at the start of the billing period."))
-    end_reading = models.FloatField(verbose_name=_("End Reading"), help_text=_("Reading at the end of the billing period."))
+    # ✅ Link to real Meter Readings
+    start_reading = models.ForeignKey(
+        "MeterReading",
+        on_delete=models.CASCADE,
+        related_name="expense_start",
+        verbose_name=_("Start Reading"),
+        help_text=_("Reference to the actual meter reading at the start of the billing period."),
+    )
+    end_reading = models.ForeignKey(
+        "MeterReading",
+        on_delete=models.CASCADE,
+        related_name="expense_end",
+        verbose_name=_("End Reading"),
+        help_text=_("Reference to the actual meter reading at the end of the billing period."),
+    )
 
     # ✅ Fixed & Variable Costs
     fixed_costs = models.DecimalField(
@@ -172,7 +184,8 @@ class Expense(models.Model):
         max_digits=10, decimal_places=2, default=0.00, verbose_name=_("Variable Costs (€)")
     )
     total_cost = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name=_("Total Amount (€)"), help_text=_("Fixed + Variable Costs")
+        max_digits=10, decimal_places=2, verbose_name=_("Total Amount (€)"),
+        help_text=_("Fixed + Variable Costs, incl. VAT")
     )
 
     # ✅ VAT Rate
@@ -181,6 +194,7 @@ class Expense(models.Model):
         help_text=_("VAT percentage applied to the total amount.")
     )
 
+    # ✅ Invoice PDF Upload
     invoice_pdf = models.FileField(
         upload_to="expenses/invoices/",
         blank=True,
@@ -189,12 +203,40 @@ class Expense(models.Model):
         help_text=_("Upload the original invoice as a PDF."),
     )
 
+    # ✅ Auto Timestamps
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))
 
+    @property
+    def consumption(self):
+        """Calculate the consumption in the billing period based on real readings."""
+        return self.end_reading.value - self.start_reading.value
+
+    def clean(self):
+        """Ensure all data integrity checks are met before saving the Expense."""
+        
+        # ✅ Ensure readings belong to the same meter as the expense
+        if self.start_reading.meter != self.meter or self.end_reading.meter != self.meter:
+            raise ValidationError(_("Start and end readings must match the meter associated with this expense."))
+
+        # ✅ Ensure readings are in correct chronological order
+        if self.end_reading.date <= self.start_reading.date:
+            raise ValidationError(_("End reading date must be after start reading date."))
+
+        # ✅ Ensure costs and VAT are valid
+        if self.fixed_costs < 0 or self.variable_costs < 0:
+            raise ValidationError(_("Fixed and variable costs cannot be negative."))
+
+        if self.vat_rate < 0 or self.vat_rate > 100:
+            raise ValidationError(_("VAT rate must be between 0% and 100%."))
+
+        # ✅ Prevent duplicate invoices
+        if Expense.objects.exclude(pk=self.pk).filter(invoice_number=self.invoice_number).exists():
+            raise ValidationError(_("An expense with this invoice number already exists."))
+
     def save(self, *args, **kwargs):
-        """Ensure total cost is always the sum of fixed + variable costs."""
-        self.total_cost = self.fixed_costs + self.variable_costs
+        """Ensure total cost is calculated correctly, including VAT."""
+        self.total_cost = (self.fixed_costs + self.variable_costs) * (1 + (self.vat_rate / 100))
         super().save(*args, **kwargs)
 
     def __str__(self):
