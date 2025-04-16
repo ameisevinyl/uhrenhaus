@@ -62,7 +62,10 @@ INSTALLED_APPS = [
 
     # Our apps
     'meters',
-    'contacts'
+    'contacts',
+
+    # Django REST framework    
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
