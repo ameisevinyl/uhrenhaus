@@ -1,5 +1,6 @@
 asgiref==3.8.1
 Django==5.2
+django-allauth==65.7.0
 djangorestframework==3.16.0
 ExifRead==3.0.0
 packaging==24.2
